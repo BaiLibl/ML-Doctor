@@ -7,7 +7,7 @@ import torch.backends.cudnn as cudnn
 
 np.set_printoptions(threshold=np.inf)
 
-from opacus import PrivacyEngine
+from opacus import PrivacyEngine # opacus requires Python version >=3.6.8 || DP uses
 from torch.optim import lr_scheduler
 from opacus.utils import module_modification
 from opacus.dp_model_inspector import DPModelInspector

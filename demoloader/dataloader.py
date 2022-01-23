@@ -39,6 +39,8 @@ class CNN(nn.Module):
         return x
 
 class UTKFaceDataset(torch.utils.data.Dataset):
+    # https://susanqq.github.io/UTKFace/
+    # [age]_[gender]_[race]_[date&time].jpg
     def __init__(self, root, attr: Union[List[str], str] = "gender", transform=None, target_transform=None)-> None:
         self.root = root
         self.transform = transform
@@ -52,6 +54,7 @@ class UTKFaceDataset(torch.utils.data.Dataset):
         self.lines = []
         for txt_file in self.files:
             with open(self.root+'/UTKFace/processed/' + txt_file, 'r') as f:
+                print(self.root+'/UTKFace/processed/' + txt_file)
                 assert f is not None
                 for i in f:
                     image_name = i.split('jpg ')[0]

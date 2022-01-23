@@ -168,7 +168,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-g', '--gpu', type=str, default="0")
     parser.add_argument('-a', '--attributes', type=str, default="race")
-    parser.add_argument('-mn', '--model_name', type=str, default="UTKFace")
+    parser.add_argument('-mn', '--model_name', type=str, default="stl10")
     parser.add_argument('-at', '--attack_type', type=int, default=0)
     parser.add_argument('-tm', '--train_model', type=str_to_bool, default="n")
     parser.add_argument('-ud', '--use_DP', type=int, default=0)
@@ -189,6 +189,8 @@ def main():
     TARGET_PATH = "./demoloader/trained_model/" + name
 
     num_classes, target_train, target_test, shadow_train, shadow_test, target_model, shadow_model = prepare_dataset(name, attr, root)
+
+    return
 
     if args.train_model:
         train_model(TARGET_PATH, device, target_train, target_test, target_model, use_DP, noise, norm)
