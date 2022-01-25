@@ -25,7 +25,7 @@ def train_model(PATH, device, train_set, test_set, model, use_DP, noise, norm):
     acc_train = 0
     acc_test = 0
 
-    for i in range(100):
+    for i in range(1): # 1
         print("<======================= Epoch " + str(i+1) + " =======================>")
         print("target training")
 
@@ -177,8 +177,8 @@ def main():
     
     args = parser.parse_args()
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
-    device = torch.device("cuda:0")
+    os.environ["CUDA_VISIBLE_DEVICES"] = "-1" # "-1" indicates use cpu
+    device = torch.device("cpu") # cpu / cuda:0
 
     name = args.model_name
     attr = args.attributes
@@ -190,10 +190,11 @@ def main():
 
     num_classes, target_train, target_test, shadow_train, shadow_test, target_model, shadow_model = prepare_dataset(name, attr, root)
 
-    return
-
-    if args.train_model:
-        train_model(TARGET_PATH, device, target_train, target_test, target_model, use_DP, noise, norm)
+    
+    target_model = models.resnet18(num_classes=num_classes)
+    train_model(TARGET_PATH, device, target_train, target_test, target_model, use_DP, noise, norm)
+    # if args.train_model:
+        # train_model(TARGET_PATH, device, target_train, target_test, target_model, use_DP, noise, norm)
 
     # membership inference
     if args.attack_type == 0:
@@ -215,9 +216,6 @@ def main():
     else:
         sys.exit("we have not supported this mode yet! 0c0")
 
-
-    # target_model = models.resnet18(num_classes=num_classes)
-    # train_model(TARGET_PATH, device, target_train + shadow_train, target_test + shadow_test, target_model)
     
 if __name__ == "__main__":
     main()
