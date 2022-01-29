@@ -14,6 +14,26 @@ from demoloader.DCGAN import *
 from utils.define_models import *
 from demoloader.dataloader import *
 
+# https://github.com/liuyugeng/ML-Doctor
+
+'''
+Attribute inference:
+√ White-box + shadow dataset: 21'CCS, Quantifying and Mitigating Privacy Risks of Contrastive Learning. 
+    [target sample embedding -> attribute]
+√ Black-box + partial training dataset: 20'ICLR, Overlearning Reveals Sensitive Attributes. In ICLR, 2020. 
+    [target model + last layer + fine-tuning -> attribute]
+
+Membership inference:
+Black-box + shadow/partial dataset: 19'NDSS, ML-Leaks
+White-box + shadow/partial dataset: 19'SP Comprehensive Privacy Analysis of Deep Learning: Passive and Active White-box Inference Attacks against Centralized and Federated Learning
+
+Model inversion:
+White-box + no dataset: 15'CCS, Model Inversion Attacks that Exploit Confidence Information and Basic Countermeasures
+White-box + shadow dataset: 20'CVPR, The Secret Revealer
+
+Model stealing:
+Black-box + shadow/partial dataset: 16'USENIX, Stealing Machine Learning Models via Prediction APIs
+'''
 
 def train_model(PATH, device, train_set, test_set, model, use_DP, noise, norm):
     train_loader = torch.utils.data.DataLoader(
@@ -121,8 +141,8 @@ def test_attrinf(PATH, device, num_classes, target_train, target_test, target_mo
     attack_length = int(0.5 * len(target_train))
     rest = len(target_train) - attack_length
 
-    attack_train, _ = torch.utils.data.random_split(target_train, [attack_length, rest])
-    attack_test = target_test
+    attack_train, _ = torch.utils.data.random_split(target_train, [attack_length, rest]) # 1/2 training data as shadow data
+    attack_test = target_test # target_test as shadow test
 
     attack_trainloader = torch.utils.data.DataLoader(
         attack_train, batch_size=64, shuffle=True, num_workers=2)
@@ -169,12 +189,14 @@ def main():
     parser.add_argument('-g', '--gpu', type=str, default="0")
     parser.add_argument('-a', '--attributes', type=str, default="race")
     parser.add_argument('-mn', '--model_name', type=str, default="stl10")
-    parser.add_argument('-at', '--attack_type', type=int, default=0)
+    parser.add_argument('-at', '--attack_type', type=int, default=3)
     parser.add_argument('-tm', '--train_model', type=str_to_bool, default="n")
     parser.add_argument('-ud', '--use_DP', type=int, default=0)
     parser.add_argument('-ne', '--noise', type=float, default=1.3)
     parser.add_argument('-nm', '--norm', type=float, default=1.5)
     
+    # attack_type 0:meminf 1:modinv 2:modsteal 3:attrinf
+    # 0 black-box+shadow 1 black-box + partial 2 white-box + paritial 3 white-box+shadow
     args = parser.parse_args()
 
     os.environ["CUDA_VISIBLE_DEVICES"] = "-1" # "-1" indicates use cpu
@@ -190,11 +212,10 @@ def main():
 
     num_classes, target_train, target_test, shadow_train, shadow_test, target_model, shadow_model = prepare_dataset(name, attr, root)
 
-    
-    target_model = models.resnet18(num_classes=num_classes)
-    train_model(TARGET_PATH, device, target_train, target_test, target_model, use_DP, noise, norm)
-    # if args.train_model:
-        # train_model(TARGET_PATH, device, target_train, target_test, target_model, use_DP, noise, norm)
+    # target_model = models.resnet18(num_classes=num_classes)
+    # train_model(TARGET_PATH, device, target_train, target_test, target_model, use_DP, noise, norm)
+    if args.train_model:
+        train_model(TARGET_PATH, device, target_train, target_test, target_model, use_DP, noise, norm)
 
     # membership inference
     if args.attack_type == 0:

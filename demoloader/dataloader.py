@@ -173,6 +173,7 @@ class CelebA(torch.utils.data.Dataset):
 def prepare_dataset(dataset, attr, root):
     num_classes, dataset, target_model, shadow_model = get_model_dataset(dataset, attr=attr, root=root)
     length = len(dataset)
+    print('Dataset Size:', length)
     each_length = length//4
     target_train, target_test, shadow_train, shadow_test, _ = torch.utils.data.random_split(dataset, [each_length, each_length, each_length, each_length, len(dataset)-(each_length*4)])
     

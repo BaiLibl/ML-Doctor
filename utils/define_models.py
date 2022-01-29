@@ -53,7 +53,7 @@ class ShadowAttackModel(nn.Module):
 		return final_result
 
 
-class PartialAttackModel(nn.Module):
+class PartialAttackModel(nn.Module): # same as ShadowAttackModel
 	def __init__(self, class_num):
 		super(PartialAttackModel, self).__init__()
 		self.Output_Component = nn.Sequential(

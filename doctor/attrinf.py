@@ -6,6 +6,14 @@ import torch.optim as optim
 from utils.define_models import *
 from sklearn.metrics import f1_score
 
+'''
+Attribute inference:
+√ White-box + shadow dataset: 21'CCS, Quantifying and Mitigating Privacy Risks of Contrastive Learning. 
+    [target sample embedding -> attribute]
+√ Black-box + partial training dataset: 20'ICLR, Overlearning Reveals Sensitive Attributes. In ICLR, 2020. 
+    [target model + last layer + fine-tuning -> attribute]
+'''
+
 class attack_training():
     def __init__(self, device, attack_trainloader, attack_testloader, target_model, TARGET_PATH, ATTACK_PATH):
         self.device = device
@@ -34,7 +42,7 @@ class attack_training():
     def init_attack_model(self, size, output_classes):
         x = torch.rand(size).to(self.device)
         input_classes = self.get_middle_output(x).flatten().shape[0]
-        self.attack_model = attrinf_attack_model(inputs=input_classes, outputs=output_classes)
+        self.attack_model = attrinf_attack_model(inputs=input_classes, outputs=output_classes) 
         self.attack_model.to(self.device)
         self.optimizer = optim.Adam(self.attack_model.parameters(), lr=1e-3)
         if output_classes == 2:
