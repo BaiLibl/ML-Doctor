@@ -138,11 +138,17 @@ def test_modinv(PATH, device, num_classes, target_train, target_model, name):
     modinv_revealer = revealer_inversion(G, D, target_model, evaluation_model, iden, device)
 
 def test_attrinf(PATH, device, num_classes, target_train, target_test, target_model):
+    # 1/2 training data as shadow data
+    # target_test as shadow test
+
     attack_length = int(0.5 * len(target_train))
     rest = len(target_train) - attack_length
 
-    attack_train, _ = torch.utils.data.random_split(target_train, [attack_length, rest]) # 1/2 training data as shadow data
-    attack_test = target_test # target_test as shadow test
+    print('attack_length:', attack_length, 'rest:', rest)
+    attack_train, _ = torch.utils.data.random_split(target_train, [attack_length, rest]) 
+    attack_test = target_test 
+
+    print('attack_train:', len(attack_train), 'attack_test:', len(attack_test))
 
     attack_trainloader = torch.utils.data.DataLoader(
         attack_train, batch_size=64, shuffle=True, num_workers=2)
@@ -150,8 +156,9 @@ def test_attrinf(PATH, device, num_classes, target_train, target_test, target_mo
         attack_test, batch_size=64, shuffle=True, num_workers=2)
 
     image_size = [1] + list(target_train[0][0].shape)
+    print('image_size:', image_size, 'num_classes:', num_classes)
     train_attack_model(
-        PATH + "_target.pth", PATH, num_classes[1], device, target_model, attack_trainloader, attack_testloader, image_size)
+        PATH + "_target.pth", PATH, num_classes, device, target_model, attack_trainloader, attack_testloader, image_size)
 
 def test_modsteal(PATH, device, train_set, test_set, target_model, attack_model):
     train_loader = torch.utils.data.DataLoader(
@@ -189,14 +196,12 @@ def main():
     parser.add_argument('-g', '--gpu', type=str, default="0")
     parser.add_argument('-a', '--attributes', type=str, default="race")
     parser.add_argument('-mn', '--model_name', type=str, default="stl10")
-    parser.add_argument('-at', '--attack_type', type=int, default=3)
+    parser.add_argument('-at', '--attack_type', type=int, default=2)
     parser.add_argument('-tm', '--train_model', type=str_to_bool, default="n")
     parser.add_argument('-ud', '--use_DP', type=int, default=0)
     parser.add_argument('-ne', '--noise', type=float, default=1.3)
     parser.add_argument('-nm', '--norm', type=float, default=1.5)
     
-    # attack_type 0:meminf 1:modinv 2:modsteal 3:attrinf
-    # 0 black-box+shadow 1 black-box + partial 2 white-box + paritial 3 white-box+shadow
     args = parser.parse_args()
 
     os.environ["CUDA_VISIBLE_DEVICES"] = "-1" # "-1" indicates use cpu
@@ -212,8 +217,8 @@ def main():
 
     num_classes, target_train, target_test, shadow_train, shadow_test, target_model, shadow_model = prepare_dataset(name, attr, root)
 
-    # target_model = models.resnet18(num_classes=num_classes)
-    # train_model(TARGET_PATH, device, target_train, target_test, target_model, use_DP, noise, norm)
+    target_model = models.resnet18(num_classes=num_classes)
+    train_model(TARGET_PATH, device, target_train, target_test, target_model, use_DP, noise, norm)
     if args.train_model:
         train_model(TARGET_PATH, device, target_train, target_test, target_model, use_DP, noise, norm)
 

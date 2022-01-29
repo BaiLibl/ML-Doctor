@@ -21,6 +21,7 @@ class attack_training():
         self.ATTACK_PATH = ATTACK_PATH
 
         self.target_model = target_model.to(self.device)
+        print('Target_path:', self.TARGET_PATH)
         self.target_model.load_state_dict(torch.load(self.TARGET_PATH))
         self.target_model.eval()
 
@@ -80,7 +81,9 @@ class attack_training():
         final_predict = []
         final_probabe = []
         
-        for batch_idx, (inputs, [_, targets]) in enumerate(self.attack_trainloader):
+        # for inputs, [_, targets] in enumerate(self.attack_trainloader):
+        for batch_idx, (inputs, targets) in enumerate(self.attack_trainloader):
+            print(inputs.size(), targets.size())
             inputs, targets = inputs.to(self.device), targets.to(self.device)
             self.optimizer.zero_grad()
             oracles = self.get_middle_output(inputs)
@@ -132,7 +135,8 @@ class attack_training():
         final_probabe = []
 
         with torch.no_grad():
-            for inputs, [_, targets] in self.attack_testloader:
+            # for inputs, [_, targets] in self.attack_testloader:
+            for inputs, targets in enumerate(self.attack_testloader):
                 inputs, targets = inputs.to(self.device), targets.to(self.device)
                 oracles = self.get_middle_output(inputs)
                 outputs = self.attack_model(oracles)

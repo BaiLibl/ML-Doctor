@@ -171,6 +171,7 @@ class CelebA(torch.utils.data.Dataset):
         return '\n'.join(lines).format(**self.__dict__)
 
 def prepare_dataset(dataset, attr, root):
+    # dataset divide into 4 parts evenly
     num_classes, dataset, target_model, shadow_model = get_model_dataset(dataset, attr=attr, root=root)
     length = len(dataset)
     print('Dataset Size:', length)
