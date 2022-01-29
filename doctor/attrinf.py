@@ -56,7 +56,7 @@ class attack_training():
         for name, _ in self.target_model.named_parameters():
             if "weight" in name:
                 temp.append(name)
-
+        
         if 1 > len(temp):
             raise IndexError('layer is out of range')
 
@@ -83,7 +83,6 @@ class attack_training():
         
         # for inputs, [_, targets] in enumerate(self.attack_trainloader):
         for batch_idx, (inputs, targets) in enumerate(self.attack_trainloader):
-            print(inputs.size(), targets.size())
             inputs, targets = inputs.to(self.device), targets.to(self.device)
             self.optimizer.zero_grad()
             oracles = self.get_middle_output(inputs)
@@ -135,8 +134,8 @@ class attack_training():
         final_probabe = []
 
         with torch.no_grad():
-            # for inputs, [_, targets] in self.attack_testloader:
-            for inputs, targets in enumerate(self.attack_testloader):
+            for batch_idx, (inputs, targets) in enumerate(self.attack_testloader):
+                # print(inputs.size(), targets.size())
                 inputs, targets = inputs.to(self.device), targets.to(self.device)
                 oracles = self.get_middle_output(inputs)
                 outputs = self.attack_model(oracles)

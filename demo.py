@@ -190,6 +190,29 @@ def str_to_bool(string):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
+    
+def test_function(PATH, device, num_classes, target_train, target_test, target_model):
+    target_path = PATH + "_target.pth"
+    attack_path = PATH
+    target_model = target_model.to(device)
+    print('Target_path:', target_path, 'Attack_path:', attack_path)
+    target_model.load_state_dict(torch.load(target_path))
+
+    temp = []
+    for name, _ in target_model.named_parameters():
+        if "weight" in name:
+            temp.append(name)
+        
+    if 1 > len(temp):
+        raise IndexError('layer is out of range')
+
+    print(temp)
+    name = temp[-2].split('.')
+    print(name)
+    var = eval('target_model.' + name[0])
+    out = {}
+    # var[int(name[1])].register_forward_hook(self._get_activation(name[1], out))
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -219,6 +242,10 @@ def main():
 
     target_model = models.resnet18(num_classes=num_classes)
     train_model(TARGET_PATH, device, target_train, target_test, target_model, use_DP, noise, norm)
+
+    test_function(TARGET_PATH, device, num_classes, target_train, target_test, target_model)
+    return 
+    
     if args.train_model:
         train_model(TARGET_PATH, device, target_train, target_test, target_model, use_DP, noise, norm)
 
